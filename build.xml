@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build" name="Chat APP">
+
+    <!-- Define a property for the location of the servlet jar file -->
+
+    <property name="src.dir" value="source"/>
+    <property name="build.dir" value="build/classes"/>
+    <property name="jar.dir" value="tomcat/webapps/ROOT/WEB-INF/lib"/>
+    <property name="servlet.jar" value="tomcat/lib/servlet-api.jar"/>
+
+
+    <!-- Define a classpath that includes the servlet and Tomcat JAR files -->
+
+    <path id="classpath">
+        <fileset dir="${jar.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${servlet.jar}"/>
+    </path>
+
+    <!-- Compile the Java source files using the servlet and Tomcat classpath -->
+
+    <target name="compile">
+        <delete includeEmptyDirs="true">
+            <fileset dir="build"/>
+        </delete>
+        <mkdir dir="${build.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" includeantruntime="false" classpathref="classpath" />
+        <echo> Java Class Compilation Completed </echo>
+    </target>
+
+    <!-- build a JAR from the compiled class to the WEB-INF/lib dir  -->
+
+    <target name="build" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/chatapp-servlet.jar" basedir="${build.dir}"/>
+        <echo message="JAR Creation Completed."/>
+    </target>
+
+   <!-- Create Database Table Task -->
+    <target name="Create Table" depends="build">
+        <java classname="DataBaseServer.DataBaseCreator" fork="true"/>
+        <echo message="DataBaseCreator Executed."/>
+    </target>
+
+</project>
