@@ -4,8 +4,13 @@ import java.util.Arrays;
 
 public class Logger {
 
-   public static void info(String className,String methodName, String info){
-      System.out.println("-- INFO :: \""+ info +"\" From Class -- \"" + className + "\" :: Method -- \""  + methodName+"\"");
+   public static void info(String className,String methodName, String info, Throwable e){
+       if(e != null && info != null){
+           System.out.println("-- INFO :: \""+ info +"\" From Class -- \"" + className + "\" :: Method -- \""  + methodName+"\"" + " --- Stack Trace : "+ e);
+       }
+       else if(e == null){
+           System.out.println("-- INFO :: \""+ info +"\" From Class -- \"" + className + "\" :: Method -- \""  + methodName+"\"");
+       }
    }
 
     public static void warn(String className,String methodName,String warn){
@@ -13,10 +18,10 @@ public class Logger {
     }
 
     public static void severe(String className, String methodName, String errorMessage,Throwable e){
-       if(e != null){
-           System.out.println("-- Expection :: \""+ errorMessage +"\" From Class -- \"" + className + "\" :: Method -- \""  + methodName+"\"" + " -- StackTrace :: " + e);
+       if(errorMessage != null && e != null){
+           System.out.println("-- Expection :: \""+ errorMessage +"\" From Class -- \"" + className + "\" :: Method -- \""  + methodName+"\"" + " -- StackTrace :: " + Arrays.toString(e.getStackTrace()));
        }
-       else {
+       else if(e == null){
            System.out.println("-- Expection :: \""+ errorMessage +"\" From Class -- \"" + className + "\" :: Method -- \""  + methodName+"\"");
        }
     }

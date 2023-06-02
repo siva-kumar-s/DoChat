@@ -1,11 +1,13 @@
 package DataBaseServer;
 
 import Server.constants.ServiceDaoConstants;
+import Server.constants.ServletConstant;
 
 import java.sql.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class ServiceDao {
 	private static String CLASSNAME = ServiceDao.class.getName();
@@ -29,22 +31,22 @@ public class ServiceDao {
 
 	public static String addUser(String name, String mailId) {
 		String methodName = "addUser";
-		String insertUserQuery = "insert into USERPROFILE.USER (name,mailId) values (?,?);";
+		String insertUserQuery = "insert into USERPROFILE.USER (USER_NAME,MAIL_ID,PASSWORD) values (?,?);";
 		Connection con = getConnection();
 		try {
 			PreparedStatement pst = con.prepareStatement(insertUserQuery);
-			String checkQuery = "SELECT mailId FROM USERPROFILE.USER WHERE mailId='" + mailId + "';";
+			String checkQuery = "SELECT mailId FROM USERPROFILE.USER WHERE MAIL_ID = '" + mailId + "';";
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(checkQuery);
 			if (rs.next()) {
 				st.close();
-				return "MailId is Already Exists";
+				return ServletConstant.MAILID_ALREADY_EXISTS;
 			} else {
 				pst.setString(1, name);
 				pst.setString(2, mailId);
 				pst.executeUpdate();
 				con.close();
-				return "New User Added Successfully";
+				return ServletConstant.NEW_USER_ADDED_SUCCESSFULLY;
 			}
 		} catch (Exception e) {
 			LoggerService.Logger.severe(CLASSNAME,methodName,"Can not add New User "+username+" to the Chat Table",e);
@@ -52,12 +54,37 @@ public class ServiceDao {
 		return null;
 	}
 
+	public  static String LoginUser(String UserMailID, String Password){
+		if(isUserMailIdExists(UserMailID)){
+			if(isValidUser(UserMailID,Password)){
+				return "Secure String cookie of user id";
+			}
+			else {
+				return "password is InValid";
+			}
+		} else {
+			return "USER MAIL IS NOT AVAILABLE";
+		}
+	}
 
-
-
-	public static boolean checkUser(String mailId, String userName) {
+	public static boolean isValidUser(String userMailID,String Password){
 		Connection con = getConnection();
-		String query = "Select id from USERPROFILE.USER where mailId =" + mailId + " AND  userName = '"+userName+"';";
+		String checkPasswordQuery = "SELECT COUNT(USER_ID) FROM USERPROFILE.USER WHERE MAIL_ID = '"+userMailID+"' and PASSWORD = '"+Password+"';";
+		try {
+
+			Statement statement = con.createStatement();
+			statement.execute(checkPasswordQuery);
+
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+
+	public static boolean isUserMailIdExists(String mailId) {
+		Connection con = getConnection();
+		String query = "Select USER_ID from USERPROFILE.USER where MAIL_ID ='" + mailId + "';";
 		try { 
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(query);
@@ -73,7 +100,7 @@ public class ServiceDao {
 
 	public static int getUserId(String mailId) {
 		Connection con = getConnection();
-		String query = "Select id from USERPROFILE.User where mailId='"+mailId+"';";
+		String query = "Select USER_ID from USERPROFILE.User where MAIL_ID ='"+mailId+"';";
 		try {
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(query);
@@ -91,17 +118,14 @@ public class ServiceDao {
 		return 1;
 	}
 
-	public static int SendMsg(int senderid, int receiverid, String msg) {
-		String query = "insert into Message values (?,?,?,?);";
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-		LocalDateTime now = LocalDateTime.now();
+	public static int SendMessage(int senderId, int receiverId, String msg) {
+		String query = "insert into MESSAGESCHEMA.MESSAGE (SENDER_ID,RECIVER_ID,MESSAGE_CONTENT) values (?,?,?);";
 		Connection con = getConnection();
 		try {
 			PreparedStatement pst = con.prepareStatement(query);
-			pst.setInt(1, senderid);
-			pst.setInt(2, receiverid);
+			pst.setInt(1, senderId);
+			pst.setInt(2, receiverId);
 			pst.setString(3, msg);
-			pst.setString(4, dtf.format(now));
 			pst.executeUpdate();
 			return 1;
 		} catch (Exception e) {
@@ -111,15 +135,15 @@ public class ServiceDao {
 	}
 
 	public static String getUsername(int userid) {
-		// TODO Auto-generated method stub
-		String query = "Select * from User Where id="+userid+";";
+
+		String query = "Select USER_NAME from USERPROFILE.USER Where USER_NAME = " + userid + ";";
 		Connection con = getConnection();
 
 		try {
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(query);
 			if (rs.next()) {
-				String name  = rs.getString(2);
+				String name  = rs.getString(1);
 				con.close();
 				st.close();
 				return name;
@@ -134,8 +158,8 @@ public class ServiceDao {
 	}
 
 
-	public static int getGid() {
-		String query = "Select * from grouptable ORDER BY gid DESC;";
+	public static int getGroupId() {
+		String query = "Select GROUP_ID from GROUPSCHEMA.GROUP WHERE ;";
 		Connection con = getConnection();
 
 		try {
@@ -443,33 +467,36 @@ public class ServiceDao {
 		
 	}
 
-	public static int removeUser(int userId) {
-		// TODO Auto-generated method stub
-		String deleteUserquery = "delete from User where id="+userId+";";
-		String deleteGroupMemberQuery = "delete from groupmember where memberid="+userId+";";
-		String deleteBlockListQuery = "delete from block_list where userid="+userId+" OR blockid="+userId+";";
+	public static String removeUser(String mailId) {
+		int userId = getUserId(mailId);
+		if(userId == -1){
+			return ServletConstant.INVALID_USER;
+		}
+		String deleteUserQuery = "delete from User where mailid="+userId+";";
+		String deleteGroupMemberQuery = "delete from groupmember where mailid="+userId+";";
+		String deleteBlockedListQuery = "delete from blockedlists where userid="+userId+" OR blockid="+userId+";";
 		Connection con = getConnection();
 		try {
-			PreparedStatement pst = con.prepareStatement(deleteUserquery);
+			PreparedStatement pst = con.prepareStatement(deleteUserQuery);
 			String checkQuery = "SELECT * FROM User WHERE id=" + userId + ";";
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(checkQuery);
 			PreparedStatement pst1 = con.prepareStatement(deleteGroupMemberQuery);
-			PreparedStatement pst2 = con.prepareStatement(deleteBlockListQuery);
+			PreparedStatement pst2 = con.prepareStatement(deleteBlockedListQuery);
 			if (!rs.next()) {
 				st.close();
-				return 2;
+				return "user account " + mailId + " is Not Available";
 			} else {
 				pst.executeUpdate();
 				pst1.executeUpdate();
 				pst2.executeUpdate();
 				con.close();
-				return 1;
+				return "user account " + mailId + " is removed from DoChat";
 			}
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		return 0;
+		return null;
 	}
 
 	public static int unBlockUser(int userId, int blockId) {
