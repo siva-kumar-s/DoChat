@@ -1,4 +1,4 @@
-package Server.Servlet;
+package Server.servlet;
 
 import DataBaseServer.ServiceDao;
 import Server.constants.ServletConstant;

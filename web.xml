@@ -3,7 +3,7 @@
 <web-app>
     <servlet>
         <servlet-name>AddUserServlet</servlet-name>
-        <servlet-class>Server.Servlet.AddUserServlet</servlet-class>
+        <servlet-class>Server.servlet.AddUserServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -13,7 +13,7 @@
 
     <servlet>
         <servlet-name>RemoveUserServlet</servlet-name>
-        <servlet-class>Server.Servlet.RemoveUserServlet</servlet-class>
+        <servlet-class>Server.servlet.RemoveUserServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

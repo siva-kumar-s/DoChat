@@ -1,4 +1,4 @@
-package Server.Servlet;
+package Server.servlet;
 
 import DataBaseServer.ServiceDao;
 import LoggerService.Logger;
@@ -11,8 +11,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-public class getMessageServlet extends HttpServlet {
-    private static final String CLASSNAME = getMessageServlet.class.getName();
+public class GetMessageServlet extends HttpServlet {
+    private static final String CLASSNAME = GetMessageServlet.class.getName();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
