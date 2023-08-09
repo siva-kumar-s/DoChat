@@ -1,4 +1,4 @@
-package Server.servlet;
+package Server.Servlet;
 
 import DataBaseServer.ServiceDao;
 import LoggerService.Logger;
