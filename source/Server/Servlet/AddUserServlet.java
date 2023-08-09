@@ -28,7 +28,7 @@ public class AddUserServlet extends HttpServlet {
 
 			JSONObject responseJson = new JSONObject();
 			if (userName != null && mailId != null && password != null) {
-				String status = ServiceDao.addUser(userName, mailId);
+				String status = ServiceDao.addUser(userName, mailId, password);
 				if (Objects.equals(status, ServletConstant.MAILID_ALREADY_EXISTS)) {
 					resp.setStatus(400);
 				}

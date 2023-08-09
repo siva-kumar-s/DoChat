@@ -25,13 +25,7 @@ public class RemoveUserServlet extends HttpServlet {
             if (mailId != null) {
                 String status = ServiceDao.removeUser(mailId);
                 if(status != null){
-                    if(status.equals(ServletConstant.INVALID_USER)){
-                        resp.setStatus(400);
-                        responseJson.put(ServletConstant.MESSAGE, ServletConstant.INVALID_USER);
-                    }
-                    else {
-                        responseJson.put(ServletConstant.MESSAGE, status);
-                    }
+                    responseJson.put(ServletConstant.MESSAGE, status);
                 }
             } else {
                 resp.setStatus(400);

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<web-app>
+    <servlet>
+        <servlet-name>AddUserServlet</servlet-name>
+        <servlet-class>Server.Servlet.AddUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AddUserServlet</servlet-name>
+        <url-pattern>/api/adduser</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RemoveUserServlet</servlet-name>
+        <servlet-class>Server.Servlet.RemoveUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RemoveUserServlet</servlet-name>
+        <url-pattern>/api/removeuser</url-pattern>
+    </servlet-mapping>
+</web-app>

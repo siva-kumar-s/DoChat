@@ -2,6 +2,8 @@ package DataBaseServer;
 
 import Server.constants.ServiceDaoConstants;
 import Server.constants.ServletConstant;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.sql.*;
 
@@ -22,20 +24,21 @@ public class ServiceDao {
 			Class.forName(dbDriver);
 			con = DriverManager.getConnection(ServiceDaoConstants.DATABASE_URL, username, password);
 		} catch (Exception e) {
-			LoggerService.Logger.severe(CLASSNAME,methodName,"Can NOT connect to Database",e);
+			e.printStackTrace();
+//			LoggerService.Logger.severe(CLASSNAME,methodName,"Can NOT connect to Database",e);
 		}
 		return con;
 	}
 
 
 
-	public static String addUser(String name, String mailId) {
+	public static String addUser(String name, String mailId, String password) {
 		String methodName = "addUser";
-		String insertUserQuery = "insert into USERPROFILE.USER (USER_NAME,MAIL_ID,PASSWORD) values (?,?);";
+		String insertUserQuery = "INSERT INTO USER_PROFILE.USER (USER_NAME,MAIL_ID,PASSWORD) VALUES (?,?,?);";
 		Connection con = getConnection();
 		try {
 			PreparedStatement pst = con.prepareStatement(insertUserQuery);
-			String checkQuery = "SELECT mailId FROM USERPROFILE.USER WHERE MAIL_ID = '" + mailId + "';";
+			String checkQuery = "SELECT MAIL_ID FROM USER_PROFILE.USER WHERE MAIL_ID = '" + mailId + "';";
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(checkQuery);
 			if (rs.next()) {
@@ -44,6 +47,7 @@ public class ServiceDao {
 			} else {
 				pst.setString(1, name);
 				pst.setString(2, mailId);
+				pst.setString(3,password);
 				pst.executeUpdate();
 				con.close();
 				return ServletConstant.NEW_USER_ADDED_SUCCESSFULLY;
@@ -69,7 +73,7 @@ public class ServiceDao {
 
 	public static boolean isValidUser(String userMailID,String Password){
 		Connection con = getConnection();
-		String checkPasswordQuery = "SELECT COUNT(USER_ID) FROM USERPROFILE.USER WHERE MAIL_ID = '"+userMailID+"' and PASSWORD = '"+Password+"';";
+		String checkPasswordQuery = "SELECT COUNT(USER_ID) FROM USER_PROFILE.USER WHERE MAIL_ID = '"+userMailID+"' and PASSWORD = '"+Password+"';";
 		try {
 
 			Statement statement = con.createStatement();
@@ -84,7 +88,7 @@ public class ServiceDao {
 
 	public static boolean isUserMailIdExists(String mailId) {
 		Connection con = getConnection();
-		String query = "Select USER_ID from USERPROFILE.USER where MAIL_ID ='" + mailId + "';";
+		String query = "Select USER_ID from USER_PROFILE.USER where MAIL_ID ='" + mailId + "';";
 		try { 
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(query);
@@ -98,14 +102,14 @@ public class ServiceDao {
 	}
 
 
-	public static int getUserId(String mailId) {
+	public static long getUserId(String mailId) {
 		Connection con = getConnection();
-		String query = "Select USER_ID from USERPROFILE.User where MAIL_ID ='"+mailId+"';";
+		String query = "SELECT USER_ID FROM USER_PROFILE.USER WHERE MAIL_ID='"+mailId+"';";
 		try {
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(query);
 			if (rs.next()) {
-				int i = rs.getInt(1);
+				long i = rs.getInt(1);
 				con.close();
 				st.close();
 				return i;
@@ -118,8 +122,8 @@ public class ServiceDao {
 		return 1;
 	}
 
-	public static int SendMessage(int senderId, int receiverId, String msg) {
-		String query = "insert into MESSAGESCHEMA.MESSAGE (SENDER_ID,RECIVER_ID,MESSAGE_CONTENT) values (?,?,?);";
+	public static String sendMessage(int senderId, int receiverId, String msg) {
+		String query = "insert into MESSAGE_SCHEMA.MESSAGE (SENDER_ID,RECIVER_ID,MESSAGE_CONTENT) values (?,?,?);";
 		Connection con = getConnection();
 		try {
 			PreparedStatement pst = con.prepareStatement(query);
@@ -127,16 +131,16 @@ public class ServiceDao {
 			pst.setInt(2, receiverId);
 			pst.setString(3, msg);
 			pst.executeUpdate();
-			return 1;
+			return "message sent successfully";
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		return 2;
+		return "unable to send Message";
 	}
 
 	public static String getUsername(int userid) {
 
-		String query = "Select USER_NAME from USERPROFILE.USER Where USER_NAME = " + userid + ";";
+		String query = "Select USER_NAME from USER_PROFILE.USER Where USER_NAME = " + userid + ";";
 		Connection con = getConnection();
 
 		try {
@@ -159,7 +163,7 @@ public class ServiceDao {
 
 
 	public static int getGroupId() {
-		String query = "Select GROUP_ID from GROUPSCHEMA.GROUP WHERE ;";
+		String query = "Select GROUP_ID from GROUP_SCHEMA.GROUP WHERE ;";
 		Connection con = getConnection();
 
 		try {
@@ -468,33 +472,36 @@ public class ServiceDao {
 	}
 
 	public static String removeUser(String mailId) {
-		int userId = getUserId(mailId);
-		if(userId == -1){
-			return ServletConstant.INVALID_USER;
+		long userId = getUserId(mailId);
+		if(userId == -1) {
+			return "user account " + mailId + " is Not Available";
 		}
-		String deleteUserQuery = "delete from User where mailid="+userId+";";
-		String deleteGroupMemberQuery = "delete from groupmember where mailid="+userId+";";
-		String deleteBlockedListQuery = "delete from blockedlists where userid="+userId+" OR blockid="+userId+";";
+		String deleteUserQuery = "DELETE FROM USER_PROFILE.USER WHERE MAIL_ID='"+mailId+"';";
+//		String deleteGroupMemberQuery = "delete from groupmember where mailid="+userId+";";
+		String deleteBlockedListQuery = "DELETE FROM USER_PROFILE.BLOCKED_USERS WHERE BLOCKED_BY = "+userId+";";
+
+		String deleteBlockedArrayQuery = "UPDATE USER_PROFILE.BLOCKED_USERS " +
+				"SET BLOCKED_USERS_ID = ARRAY_REMOVE(BLOCKED_USERS_ID, " + userId + ") " +
+				"WHERE "+ userId +" = ANY(BLOCKED_USERS_ID);";
+
 		Connection con = getConnection();
 		try {
 			PreparedStatement pst = con.prepareStatement(deleteUserQuery);
-			String checkQuery = "SELECT * FROM User WHERE id=" + userId + ";";
 			Statement st = con.createStatement();
-			ResultSet rs = st.executeQuery(checkQuery);
-			PreparedStatement pst1 = con.prepareStatement(deleteGroupMemberQuery);
+//			PreparedStatement pst1 = con.prepareStatement(deleteGroupMemberQuery);
 			PreparedStatement pst2 = con.prepareStatement(deleteBlockedListQuery);
-			if (!rs.next()) {
-				st.close();
-				return "user account " + mailId + " is Not Available";
-			} else {
-				pst.executeUpdate();
-				pst1.executeUpdate();
-				pst2.executeUpdate();
-				con.close();
-				return "user account " + mailId + " is removed from DoChat";
-			}
+			PreparedStatement pst3 = con.prepareStatement(deleteBlockedArrayQuery);
+//
+			pst.executeUpdate();
+//				pst1.executeUpdate();
+			pst2.executeUpdate();
+			pst3.executeUpdate();
+			con.close();
+			return "user account " + mailId + " is removed from DoChat";
+
 		} catch (Exception e) {
 			System.out.println(e);
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -541,5 +548,42 @@ public class ServiceDao {
 			System.out.println(e);
 		}
 		return 1;
+	}
+
+	public static JSONArray getMessages(long senderId, long receiverId, String lastMessageId) {
+		String getMessageQuery;
+		if(lastMessageId.equals(ServletConstant.FIRST_RETRIEVE)){
+			 getMessageQuery = "SELECT MESSAGE_ID, SENDER_ID, RECEIVER_ID, MESSAGE_CONTENT, SENT_AT, IS_READ FROM MESSAGE_SCHEMA.MESSAGE WHERE SENDER_ID="
+					+ senderId + "AND  RECEIVER_ID = " + receiverId + " ORDER_BY SENT_AT DESC LIMIT 10";
+		}
+		else {
+			 getMessageQuery = "SELECT MESSAGE_ID, SENDER_ID, RECEIVER_ID, MESSAGE_CONTENT, SENT_AT, IS_READ FROM MESSAGE_SCHEMA.MESSAGE WHERE SENDER_ID="
+					 + senderId + " AND RECEIVER_ID = " + receiverId + " AND MESSAGE_ID < "+ lastMessageId +"ORDER_BY SENT_AT DESC LIMIT 10";
+		}
+		
+		JSONArray messageJsonArray = new JSONArray();
+
+		try {
+			Connection con = getConnection();
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery(getMessageQuery);
+			while(rs.next()) {
+				
+				JSONObject messageJson = new JSONObject();
+				messageJson.put("message_id", rs.getString("MESSAGE_ID"));
+				messageJson.put("sender_id", rs.getString("SENDER_ID"));
+				messageJson.put("receiver_id", rs.getString("RECEIVER_ID"));
+				messageJson.put("message_content", rs.getString("MESSAGE_CONTENT"));
+				messageJson.put("sent_at", rs.getString("SENT_AT"));
+				messageJson.put("is_read", rs.getBoolean("IS_READ"));
+				
+				messageJsonArray.put(messageJson);
+			}
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
+		return messageJsonArray;
 	}
 }

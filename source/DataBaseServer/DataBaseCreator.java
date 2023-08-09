@@ -30,7 +30,7 @@ public class DataBaseCreator {
             System.out.println("blocked user table is created successfully.");
         }
         else{
-            System.out.println("blocked user table is created successfully.");
+            System.out.println("blocked user table is already created.");
         }
         if(createGroupMessageTable()){
             System.out.println("group message table is created successfully.");
@@ -43,12 +43,13 @@ public class DataBaseCreator {
         String methodName = "createUserTable";
         Connection con = ServiceDao.getConnection();
         try {
-            String createUserSchemaQuery = "CREATE SCHEMA IF NOT EXISTS USERPROFILE";
-            String createChatTableQuery = "CREATE TABLE IF NOT EXISTS USERPROFILE.USER"
+            String createUserSchemaQuery = "CREATE SCHEMA IF NOT EXISTS USER_PROFILE";
+            String createChatTableQuery = "CREATE TABLE IF NOT EXISTS USER_PROFILE.USER"
                     + "  (USER_ID SERIAL PRIMARY KEY,"
                     + "  USER_NAME VARCHAR(25),"
                     + "  MAIL_ID   VARCHAR(45),"
-                    + "  PASSWORD  VARCHAR(15))";
+                    + "  PASSWORD  VARCHAR(15),"
+                    + "  CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
             Statement createUserprofileSchemaStmt = con.createStatement();
             Statement createUserTableStmt = con.createStatement();
             createUserprofileSchemaStmt.execute(createUserSchemaQuery);
@@ -56,7 +57,7 @@ public class DataBaseCreator {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LoggerService.Logger.severe(CLASSNAME,methodName,"Can not Create CHAT USER Table",e);
+//            LoggerService.Logger.severe(CLASSNAME,methodName,"Can not Create CHAT USER Table",e);
         }
         return  false;
     }
@@ -65,14 +66,14 @@ public class DataBaseCreator {
         String methodName = "createMessageTable";
         Connection con = ServiceDao.getConnection();
         try {
-            String createMessageSchema = "CREATE SCHEMA IF NOT EXISTS MESSAGESCHEMA";
-            String createMessageTableQuery = "CREATE TABLE IF NOT EXISTS MESSAGESCHEMA.MESSAGE"
+            String createMessageSchema = "CREATE SCHEMA IF NOT EXISTS MESSAGE_SCHEMA";
+            String createMessageTableQuery = "CREATE TABLE IF NOT EXISTS MESSAGE_SCHEMA.MESSAGE"
                     + "(MESSAGE_ID SERIAL PRIMARY KEY," +
                     "  SENDER_ID INTEGER," +
                     "  RECEIVER_ID INTEGER," +
                     "  MESSAGE_CONTENT VARCHAR(500)," +
-                    "  SENT_AT DATE DEFAULT now(),"+
-                    "  IS_READ BOOLEAN)";
+                    "  SENT_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"+
+                    "  IS_READ BOOLEAN DEFAULT FALSE)";
 
             Statement createMessageSchemaStmt = con.createStatement();
             Statement createMessageTableStmt = con.createStatement();
@@ -91,11 +92,11 @@ public class DataBaseCreator {
         String methodName = "createGroupTable";
         Connection con = ServiceDao.getConnection();
         try {
-            String createGroupSchemaQuery = "CREATE SCHEMA IF NOT EXISTS GROUPSCHEMA";
-            String createGroupTableQuery = "CREATE TABLE IF NOT EXISTS GROUPSCHEMA.GROUPS"
+            String createGroupSchemaQuery = "CREATE SCHEMA IF NOT EXISTS GROUP_SCHEMA";
+            String createGroupTableQuery = "CREATE TABLE IF NOT EXISTS GROUP_SCHEMA.GROUPS"
                     + "(GROUP_ID SERIAL PRIMARY KEY," +
                     "  GROUP_NAME VARCHAR(20) NOT NULL ," +
-                    "  GROUP_ADMIN_ID VARCHAR(25) NOT NULL," +
+                    "  GROUP_ADMIN_ID INTEGER NOT NULL," +
                     "  CREATED_AT DATE DEFAULT now(),"+
                     "  MEMBER_ID INTEGER[] DEFAULT null)";
 
@@ -116,9 +117,9 @@ public class DataBaseCreator {
         String methodName = "createGroupMessageTable";
         Connection con = ServiceDao.getConnection();
         try {
-            String createGroupSchemaQuery = "CREATE SCHEMA IF NOT EXISTS GROUPSCHEMA";
-            String createGroupMessageTable = "CREATE TABLE IF NOT EXISTS GROUPSCHEMA.GROUP_MESSAGE"
-                    + "(GROUP_ID SERIAL PRIMARY KEY," +
+            String createGroupSchemaQuery = "CREATE SCHEMA IF NOT EXISTS GROUP_SCHEMA";
+            String createGroupMessageTable = "CREATE TABLE IF NOT EXISTS GROUP_SCHEMA.GROUP_MESSAGE"
+                    + "(GROUP_MESSAGE_ID SERIAL PRIMARY KEY," +
                     "  SENDER_ID INTEGER NOT NULL ," +
                     "  MESSAGE_CONTENT VARCHAR(500)," +
                     "  SENT_AT DATE DEFAULT now())";
@@ -141,11 +142,11 @@ public class DataBaseCreator {
         String methodName = "createBlockedUsersTable";
         Connection con = ServiceDao.getConnection();
         try {
-            String createBlockedUserTable = "CREATE TABLE IF NOT EXISTS USERPROFILE.BLOCKED_USERS"
+            String createBlockedUserTable = "CREATE TABLE IF NOT EXISTS USER_PROFILE.BLOCKED_USERS"
                     + "(BLOCK_ID SERIAL PRIMARY KEY," +
-                    "  BLOCKED_USER_ID INTEGER[] NOT NULL," +
-                    "  BLOCKED_BY SERIAL NOT NULL," +
-                    "  CREATED_AT DATE DEFAULT now())";
+                    "  BLOCKED_USERS_ID INTEGER[] NOT NULL," +
+                    "  BLOCKED_BY INTEGER NOT NULL," +
+                    "  CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
 
             Statement createBlockedUserTableStmt = con.createStatement();
             return createBlockedUserTableStmt.execute(createBlockedUserTable);

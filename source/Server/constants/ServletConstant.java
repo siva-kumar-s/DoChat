@@ -12,4 +12,11 @@ public class ServletConstant {
 
     public static final String INVALID_USER = "Invalid User";
     public static final String PASSWORD = "password";
+    public static final String SENDER_ID = "senderId";
+    public static final String RECEIVER_ID = "receiverId";
+    public static final String CONTENT = "content";
+    public static final Object MESSAGE_SENT_SUCCESSFULLY = "message sent successfully";
+    public static final String LASE_MESSAGE_ID = "last_message_id";
+    public static final String FIRST_RETRIEVE = "frist_retrieve";
+    public static final String DATA = "data";
 }
