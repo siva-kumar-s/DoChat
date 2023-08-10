@@ -1,4 +1,4 @@
-package LoggerService;
+package dochat.logger;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

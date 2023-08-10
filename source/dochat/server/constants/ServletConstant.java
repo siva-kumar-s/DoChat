@@ -1,4 +1,4 @@
-package Server.constants;
+package dochat.server.constants;
 
 public class ServletConstant {
     public static final String MESSAGE = "message";

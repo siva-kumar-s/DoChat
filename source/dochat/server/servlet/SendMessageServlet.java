@@ -1,8 +1,8 @@
-package Server.servlet;
+package dochat.server.servlet;
 
-import DataBaseServer.ServiceDao;
-import LoggerService.Logger;
-import Server.constants.ServletConstant;
+import dochat.logger.Logger;
+import dochat.database_server.ServiceDao;
+import dochat.server.constants.ServletConstant;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

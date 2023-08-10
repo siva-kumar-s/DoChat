@@ -3,7 +3,7 @@
 <web-app>
     <servlet>
         <servlet-name>AddUserServlet</servlet-name>
-        <servlet-class>Server.servlet.AddUserServlet</servlet-class>
+        <servlet-class>dochat.logger.server.servlet.AddUserServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -13,7 +13,7 @@
 
     <servlet>
         <servlet-name>RemoveUserServlet</servlet-name>
-        <servlet-class>Server.servlet.RemoveUserServlet</servlet-class>
+        <servlet-class>dochat.server.servlet.RemoveUserServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

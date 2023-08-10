@@ -45,7 +45,7 @@
 
     <!-- Create Database Table Task -->
     <target name="create_table" depends="build">
-        <java classname="DataBaseServer.DataBaseCreator" fork="true"/>
+        <java classname="dochat.database_server.DataBaseCreator" fork="true"/>
         <echo message="DataBaseCreator Executed."/>
     </target>
 

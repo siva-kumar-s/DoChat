@@ -1,7 +1,8 @@
-package Server.servlet;
+package dochat.server.servlet;
 
-import DataBaseServer.ServiceDao;
-import Server.constants.ServletConstant;
+import dochat.logger.Logger;
+import dochat.database_server.ServiceDao;
+import dochat.server.constants.ServletConstant;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,7 +43,7 @@ public class RemoveUserServlet extends HttpServlet {
                     resp.getWriter().close();
                 }
             } catch (IOException e) {
-                LoggerService.Logger.severe(CLASSNAME,methodName,"Cannot close response output stream",e);
+                Logger.severe(CLASSNAME,methodName,"Cannot close response output stream",e);
             }
         }
     }

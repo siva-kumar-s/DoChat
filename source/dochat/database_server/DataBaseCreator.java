@@ -1,4 +1,4 @@
-package DataBaseServer;
+package dochat.database_server;
 
 
 import java.sql.Connection;
